@@ -14,6 +14,10 @@ import SelfCare from './components/SelfCare';
 import WatchWorld from './components/WatchWorld';
 import Diary from './components/Diary';
 import Medicines from './components/Medicines';
+import WishBox from './components/WishBox';
+import BackgroundParticles from './components/BackgroundParticles';
+import InteractionOverlay from './components/InteractionOverlay';
+import LofiPlayer from './components/LofiPlayer';
 import BottomNav from './components/BottomNav';
 import CelebrationPopup from './components/CelebrationPopup';
 import WelcomePopup from './components/WelcomePopup';
@@ -128,44 +132,84 @@ export default function App() {
 
   return (
     <div 
-      className="min-h-screen transition-all duration-[2000ms] ease-in-out" 
+      className="min-h-screen transition-all duration-[2000ms] ease-in-out relative overflow-hidden" 
       style={{ background: dayInfo.gradient }}
     >
+      <InteractionOverlay />
+      <BackgroundParticles dayInfo={dayInfo} />
+      <div className="grain-overlay" />
+      <LofiPlayer />
       <div 
-        className="max-container flex flex-col pt-12 pb-32 overflow-y-auto no-scrollbar"
+        className="max-container flex flex-col pt-12 pb-32 overflow-y-auto no-scrollbar relative z-10"
         style={{ color: dayInfo.isDark ? '#FFFFFF' : '#2C1810' }}
       >
         <AnimatePresence mode="wait">
           {currentView === 'home' && (
-            <Home 
+            <motion.div
               key="home"
-              tasks={todayTasks} 
-              onToggle={handleTaskToggle}
-              onAddTask={(t) => setTodayTasks(prev => [...prev, t])}
-              dayInfo={dayInfo}
-              setView={setView}
-            />
+              initial={{ filter: "blur(20px)", opacity: 0, scale: 1.1 }}
+              animate={{ filter: "blur(0px)", opacity: 1, scale: 1 }}
+              exit={{ filter: "blur(20px)", opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+            >
+              <Home 
+                tasks={todayTasks} 
+                onToggle={handleTaskToggle}
+                onAddTask={(t) => setTodayTasks(prev => [...prev, t])}
+                dayInfo={dayInfo}
+                setView={setView}
+              />
+            </motion.div>
           )}
           {currentView === 'settings' && (
-            <Settings 
+            <motion.div
               key="settings"
-              anchorTasks={anchorTasks} 
-              onUpdateAnchors={(newAnchors) => {
-                setAnchorTasks(newAnchors);
-                localStorage.setItem('tanha_anchor_tasks', JSON.stringify(newAnchors));
-              }}
-              onBack={() => setView('home')}
-            />
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -100 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            >
+              <Settings 
+                anchorTasks={anchorTasks} 
+                onUpdateAnchors={(newAnchors) => {
+                  setAnchorTasks(newAnchors);
+                  localStorage.setItem('tanha_anchor_tasks', JSON.stringify(newAnchors));
+                }}
+                onBack={() => setView('home')}
+              />
+            </motion.div>
           )}
-          {currentView === 'more' && <More key="more" setView={setView} />}
-          {currentView === 'cycle' && <CycleTracker key="cycle" onBack={() => setView('more')} />}
-          {currentView === 'hair' && <HairCare key="hair" onBack={() => setView('more')} />}
-          {currentView === 'dates' && <ImportantDates key="dates" onBack={() => setView('more')} />}
-          {currentView === 'shopping' && <ShoppingList key="shopping" onBack={() => setView('more')} />}
-          {currentView === 'self-care' && <SelfCare key="self-care" onBack={() => setView('more')} triggerCelebration={triggerCelebration} />}
-          {currentView === 'watch' && <WatchWorld key="watch" onBack={() => setView('more')} triggerCelebration={triggerCelebration} />}
-          {currentView === 'diary' && <Diary key="diary" onBack={() => setView('more')} triggerCelebration={triggerCelebration} />}
-          {currentView === 'medicines' && <Medicines key="medicines" onBack={() => setView('more')} triggerCelebration={triggerCelebration} />}
+          {currentView === 'more' && (
+            <motion.div
+              key="more"
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            >
+              <More setView={setView} />
+            </motion.div>
+          )}
+          {currentView === 'wish-box' && (
+            <motion.div
+              key="wish-box"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 1.2, opacity: 0 }}
+              transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+            >
+              <WishBox onBack={() => setView('more')} />
+            </motion.div>
+          )}
+          {/* ... keeping other views but wrapping them for liquid feel ... */}
+          {currentView === 'cycle' && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="cycle"><CycleTracker onBack={() => setView('more')} /></motion.div>}
+          {currentView === 'hair' && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="hair"><HairCare onBack={() => setView('more')} /></motion.div>}
+          {currentView === 'dates' && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="dates"><ImportantDates onBack={() => setView('more')} /></motion.div>}
+          {currentView === 'shopping' && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="shopping"><ShoppingList onBack={() => setView('more')} /></motion.div>}
+          {currentView === 'self-care' && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="self-care"><SelfCare onBack={() => setView('more')} triggerCelebration={triggerCelebration} /></motion.div>}
+          {currentView === 'watch' && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="watch"><WatchWorld onBack={() => setView('more')} triggerCelebration={triggerCelebration} /></motion.div>}
+          {currentView === 'diary' && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="diary"><Diary onBack={() => setView('more')} triggerCelebration={triggerCelebration} /></motion.div>}
+          {currentView === 'medicines' && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="medicines"><Medicines onBack={() => setView('more')} triggerCelebration={triggerCelebration} /></motion.div>}
         </AnimatePresence>
 
         <BottomNav 

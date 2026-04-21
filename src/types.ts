@@ -19,7 +19,16 @@ export type View =
   | 'self-care'
   | 'watch'
   | 'diary'
-  | 'medicines';
+  | 'medicines'
+  | 'wish-box';
+
+export interface Wish {
+  id: string;
+  content: string;
+  category: 'travel' | 'fashion' | 'feeling' | 'other';
+  date: string;
+  isGranted: boolean;
+}
 
 export interface UserSettings {
   tanha_onboarding_complete: boolean;

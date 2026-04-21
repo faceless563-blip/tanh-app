@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'motion/react';
 import { Task, DayInfo, HairCareLog, ImportantDate, BathLog, SelfCareDailyLog, WatchItem, Medicine, DoseLog } from '../types';
 import { getDayOfYear } from '../utils/helpers';
 import { LOVE_NOTES, EMOJI_MAP, EMOJI_PICKER } from '../constants';
@@ -14,10 +14,46 @@ interface Props {
   setView: (v: any) => void;
 }
 
+const Sparkle = ({ x, y }: { x: number, y: number }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 1, scale: 0 }}
+      animate={{ opacity: 0, scale: 1.5, y: -50, x: (Math.random() - 0.5) * 40 }}
+      transition={{ duration: 1, ease: "easeOut" }}
+      className="absolute pointer-events-none z-50 text-xl"
+      style={{ left: x, top: y }}
+    >
+      {['✨', '💖', '⭐', '🌸'][Math.floor(Math.random() * 4)]}
+    </motion.div>
+  );
+};
+
 export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView }: Props) {
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', emoji: '✅', time: '' });
   const [error, setError] = useState('');
+  const [sparkles, setSparkles] = useState<{ id: number, x: number, y: number }[]>([]);
+  
+  // High performance motion values
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  
+  const springConfig = { damping: 25, stiffness: 200 };
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [15, -15]), springConfig);
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-15, 15]), springConfig);
+  const shiftX = useSpring(useTransform(mouseX, [-0.5, 0.5], [5, -5]), springConfig);
+  const shiftY = useSpring(useTransform(mouseY, [-0.5, 0.5], [5, -5]), springConfig);
+
+  const handleHeaderMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
+    mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
+  };
+
+  const resetHeader = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
 
   const [nudges, setNudges] = useState<{ id: string, text: string, type: 'hair' | 'date' | 'selfcare', icon: string }[]>([]);
 
@@ -146,19 +182,44 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView }: P
     setShowAddSheet(false);
   };
 
+  const handleSparkle = (e: React.MouseEvent) => {
+    const id = Date.now();
+    setSparkles(prev => [...prev, { id, x: e.clientX, y: e.clientY }]);
+    setTimeout(() => {
+      setSparkles(prev => prev.filter(s => s.id !== id));
+    }, 1000);
+  };
+
   const anchorTasks = tasks.filter(t => t.type === 'anchor');
   const todayTasks = tasks.filter(t => t.type === 'today');
 
   return (
-    <div className="space-y-8 px-6 pb-20">
-      <header className="py-4 flex justify-between items-start">
+    <div className="space-y-8 px-6 pb-20 relative">
+      {sparkles.map(s => (
+        <Sparkle key={s.id} x={s.x} y={s.y} />
+      ))}
+      
+      <motion.header 
+        onMouseMove={handleHeaderMove}
+        onMouseLeave={resetHeader}
+        style={{ 
+          rotateX, 
+          rotateY,
+          perspective: 1000
+        }}
+        className="py-4 flex justify-between items-start cursor-default"
+      >
         <div className="space-y-1">
-          <h1 
+          <motion.h1 
+            style={{ 
+              x: shiftX, 
+              y: shiftY,
+              color: dayInfo.isDark ? '#FFFFFF' : '#2C1810'
+            }}
             className="text-4xl font-serif font-bold italic drop-shadow-sm"
-            style={{ color: dayInfo.isDark ? '#FFFFFF' : '#2C1810' }}
           >
             {dayInfo.greeting}
-          </h1>
+          </motion.h1>
           <p className="text-sm font-semibold opacity-70" style={{ color: dayInfo.isDark ? 'rgba(255,255,255,0.85)' : '#8B6F6F' }}>
             {dayInfo.dateStr}
           </p>
@@ -173,7 +234,7 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView }: P
           </div>
           <button className="text-[#8B6F6F]/40"><Settings size={20} /></button>
         </div>
-      </header>
+      </motion.header>
 
       <section className="flex gap-4 h-44">
         <div className="flex-[1.2] glass-card p-5 flex flex-col justify-between">
@@ -231,7 +292,7 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView }: P
            <h3 className="text-xs font-bold tracking-[0.15em] text-[#8B3A52] uppercase px-1">🔒 Anchor Tasks</h3>
            <div className="space-y-3">
               {anchorTasks.map(task => (
-                <TaskItem key={task.id} task={task} onToggle={onToggle} />
+                <TaskItem key={task.id} task={task} onToggle={onToggle} onSparkle={handleSparkle} />
               ))}
            </div>
         </div>
@@ -240,13 +301,26 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView }: P
            <h3 className="text-xs font-bold tracking-[0.15em] text-[#8B3A52] uppercase px-1">📋 Today's Tasks</h3>
            <div className="space-y-3">
               {todayTasks.length === 0 ? (
-                <div className="text-center py-10 space-y-2 opacity-40">
-                  <span className="text-4xl">🌸</span>
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-10 space-y-4 relative"
+                >
+                  <motion.div
+                    animate={{ 
+                      y: [0, -10, 0],
+                      rotate: [0, 5, -5, 0]
+                    }}
+                    transition={{ duration: 6, repeat: Infinity }}
+                    className="text-6xl"
+                  >
+                    🦋
+                  </motion.div>
                   <p className="font-accent italic text-[#8B6F6F]">Nothing added yet 🌸<br/>Tap + to add something for today 💕</p>
-                </div>
+                </motion.div>
               ) : (
                 todayTasks.map(task => (
-                  <TaskItem key={task.id} task={task} onToggle={onToggle} />
+                  <TaskItem key={task.id} task={task} onToggle={onToggle} onSparkle={handleSparkle} />
                 ))
               )}
            </div>
@@ -351,11 +425,17 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView }: P
   );
 }
 
-function TaskItem({ task, onToggle }: { task: Task, onToggle: (id: string) => void }) {
+function TaskItem({ task, onToggle, onSparkle }: { task: Task, onToggle: (id: string) => void, onSparkle: (e: React.MouseEvent) => void }) {
   return (
     <motion.div 
       layout
-      className={`glass-card p-4 flex items-center gap-4 border-l-[4px] border-[#B76E79] transition-all ${task.completed ? 'bg-white/40' : ''}`}
+      whileHover={{ scale: 1.02, rotateX: 2, rotateY: 2 }}
+      whileTap={{ scale: 0.98 }}
+      viewport={{ once: true }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      className={`glass-card p-4 flex items-center gap-4 border-l-[4px] border-[#B76E79] transition-all ${task.completed ? 'bg-white/40 shadow-inner' : ''}`}
+      style={{ willChange: 'transform, opacity' }}
     >
        <span className="text-2xl">{task.emoji}</span>
        <div className="flex-1 min-w-0">
@@ -365,7 +445,10 @@ function TaskItem({ task, onToggle }: { task: Task, onToggle: (id: string) => vo
           {task.time && <span className="text-[10px] font-bold text-[#8B6F6F]/60 uppercase tracking-widest">{task.time}</span>}
        </div>
        <button 
-         onClick={() => onToggle(task.id)}
+         onClick={(e) => {
+           onToggle(task.id);
+           if (!task.completed) onSparkle(e);
+         }}
          className={`w-7 h-7 rounded-full border-2 transition-all flex items-center justify-center shrink-0 ${
            task.completed ? 'bg-[#B76E79] border-[#B76E79] text-white' : 'border-[#B76E79]/30'
          }`}

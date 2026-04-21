@@ -233,6 +233,48 @@ export default function Diary({ onBack, triggerCelebration }: Props) {
         })}
       </div>
 
+      {/* Mood Heatmap - Year in Pixels */}
+      <div className="glass-card p-6 border-none shadow-sm space-y-6">
+        <div className="flex items-center justify-between">
+           <p className="text-xs font-black uppercase tracking-widest text-[#B76E79]">Mood Pixel Tapestry 🎨</p>
+           <span className="text-[10px] font-bold text-[#8B6F6F]">{format(new Date(), 'yyyy')}</span>
+        </div>
+        
+        <div className="grid grid-cols-7 gap-1">
+          {Array.from({ length: 31 }).map((_, i) => {
+            const dateStr = format(new Date(new Date().getFullYear(), new Date().getMonth(), i + 1), 'yyyy-MM-dd');
+            const entry = entries.find(e => e.date === dateStr);
+            const moodMap: Record<string, string> = {
+              '😊': '#FFD54F', '😢': '#90CAF9', '😰': '#9E9E9E', '😤': '#EF5350', 
+              '🧘': '#81C784', '🥰': '#F48FB1', '😴': '#9C7BB5', '😭': '#5C6BC0', 
+              '🥺': '#FFAB91', '😌': '#BDBDBD'
+            };
+            const color = entry?.mood ? (moodMap[entry.mood] || '#B76E79') : '#F1F1F1';
+
+            return (
+              <div 
+                key={i} 
+                className="aspect-square rounded-sm border border-black/5"
+                title={entry ? `Day ${i+1}: ${entry.mood}` : `Day ${i+1}`}
+                style={{ backgroundColor: color }}
+              />
+            );
+          })}
+        </div>
+        
+        <div className="flex flex-wrap gap-3">
+          {MOODS.slice(0, 6).map(m => (
+            <div key={m} className="flex items-center gap-1">
+              <div 
+                className="w-2 h-2 rounded-sm" 
+                style={{ backgroundColor: (m === '😊' ? '#FFD54F' : m === '😢' ? '#90CAF9' : m === '🥰' ? '#F48FB1' : '#B76E79') }} 
+              />
+              <span className="text-[10px] font-bold text-[#8B6F6F]">{m}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Editor Modal */}
       <AnimatePresence>
         {showEditor && (
