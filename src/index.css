@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Dancing+Script:wght@400;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-nunito: "Nunito", sans-serif;
+  --font-serif: "Cormorant Garamond", serif;
+  --font-accent: "Playfair Display", serif;
+  --font-script: "Dancing Script", cursive;
+}
+
+:root {
+  --rose-gold: #B76E79;
+  --deep-rose: #C2185B;
+  --dark-text: #2C1810;
+  --secondary-text: #8B6F6F;
+  --card-bg: #FDFAF7;
+  --blush: #FFF0F3;
+}
+
+body {
+  @apply font-nunito antialiased text-[#2C1810];
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.max-container {
+  @apply max-w-[480px] mx-auto min-h-screen relative shadow-2xl bg-white/20;
+}
+
+.glass-card {
+  @apply bg-[#FDFAF7] rounded-[24px] shadow-sm border border-[rgba(183,110,121,0.15)] overflow-hidden;
+}
+
+.floating-heart {
+  position: absolute;
+  pointer-events: none;
+  animation: float 4s ease-in infinite;
+  opacity: 0;
+}
+
+@keyframes float {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  20% { opacity: 0.8; }
+  100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
+}
+
+@keyframes pulse-emoji {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.pulse-emoji {
+  animation: pulse-emoji 2s infinite ease-in-out;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
