@@ -20,7 +20,36 @@ export type View =
   | 'watch'
   | 'diary'
   | 'medicines'
-  | 'wish-box';
+  | 'wish-box'
+  | 'sleep'
+  | 'vault';
+
+export interface SleepLog {
+  id: string;
+  date: string;
+  bedtime: string;
+  wakeTime: string;
+  durationMinutes: number;
+  qualityRating: number;
+  wakingFeelings: string[];
+  sleepDisruptors: string[];
+  notes: string;
+  cyclePhase: string;
+}
+
+export interface SleepSettings {
+  targetBedtime: string;
+  targetWakeTime: string;
+}
+
+export interface LoveLetter {
+  id: string;
+  title: string;
+  content: string;
+  moodColor: string;
+  accent: string;
+  firstLine: string;
+}
 
 export interface Wish {
   id: string;

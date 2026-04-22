@@ -14,10 +14,13 @@ import SelfCare from './components/SelfCare';
 import WatchWorld from './components/WatchWorld';
 import Diary from './components/Diary';
 import Medicines from './components/Medicines';
-import WishBox from './components/WishBox';
+import WishBoxSheet from './components/WishBoxSheet';
+import SleepTracker from './components/SleepTracker';
+import LoveLetterVault from './components/LoveLetterVault';
+import AppTour from './components/AppTour';
+import NewFeaturesPopup from './components/NewFeaturesPopup';
 import BackgroundParticles from './components/BackgroundParticles';
 import InteractionOverlay from './components/InteractionOverlay';
-import LofiPlayer from './components/LofiPlayer';
 import BottomNav from './components/BottomNav';
 import CelebrationPopup from './components/CelebrationPopup';
 import WelcomePopup from './components/WelcomePopup';
@@ -32,11 +35,32 @@ export default function App() {
     return localStorage.getItem('tanha_welcome_shown') === 'true';
   });
   
+  const [showNewFeatures, setShowNewFeatures] = useState<boolean>(() => {
+    return localStorage.getItem('tanha_new_features_v2_shown') !== 'true';
+  });
+
+  const [showTour, setShowTour] = useState<boolean>(false);
+  const [isWishBoxOpen, setIsWishBoxOpen] = useState(false);
+
   const [anchorTasks, setAnchorTasks] = useState<Task[]>(() => {
     const saved = localStorage.getItem('tanha_anchor_tasks');
     return saved ? JSON.parse(saved) : [];
   });
   
+  const [streak, setStreak] = useState<number>(0);
+  const [showVaultHint, setShowVaultHint] = useState(false);
+
+  useEffect(() => {
+    // Basic streak calculation from localStorage 'tanha_streak_data'
+    // For demo purpose, we check if 7 days done
+    const streakData = JSON.parse(localStorage.getItem('tanha_streak_data') || '{"count": 0, "lastDate": ""}');
+    setStreak(streakData.count);
+    
+    // Vault hint reveal
+    if (streakData.count >= 7 && localStorage.getItem('tanha_vault_hint_shown') !== 'true') {
+      setShowVaultHint(true);
+    }
+  }, []);
   const [todayTasks, setTodayTasks] = useState<Task[]>(() => {
     const saved = localStorage.getItem('tanha_today_tasks');
     return saved ? JSON.parse(saved) : [];
@@ -47,19 +71,22 @@ export default function App() {
 
   const dayInfo = useMemo(() => getDayInfo(), [new Date().getHours()]);
 
-  // Midnight Reset Logic Phase 3
+  // Midnight Reset Logic Phase 4
   useEffect(() => {
     const lastOpen = localStorage.getItem('tanha_last_open_date');
     const today = new Date().toDateString();
-    const todayISO = format(new Date(), 'yyyy-MM-dd');
     
     if (lastOpen && lastOpen !== today) {
       setTodayTasks([]); 
       localStorage.setItem('tanha_last_open_date', today);
       
-      // Phase 3 Resets
-      // Self Care already logged today? (Handled by checking date in logs)
-      // Medicine doses generation happens on mount and nav
+      // Phase 4 Reset Completions
+      localStorage.removeItem('tanha_bath_logs_daily'); // Reset bath
+      localStorage.removeItem('tanha_self_care_daily'); // Reset self care
+      localStorage.removeItem('tanha_dismissed_nudges'); // Clear nudges
+      
+      // Medicine doses generation logic...
+      // Streaks updates...
     }
     localStorage.setItem('tanha_last_open_date', today);
   }, []);
@@ -94,6 +121,17 @@ export default function App() {
       const targetTask = updated.find(t => t.id === taskId);
       if (targetTask?.completed) triggerCelebration();
       if (updated.length > 0 && updated.every(t => t.completed)) {
+        const streakData = JSON.parse(localStorage.getItem('tanha_streak_data') || '{"count": 0, "lastDate": ""}');
+        const todayStr = new Date().toDateString();
+        if (streakData.lastDate !== todayStr) {
+          streakData.count += 1;
+          streakData.lastDate = todayStr;
+          localStorage.setItem('tanha_streak_data', JSON.stringify(streakData));
+          setStreak(streakData.count);
+          if (streakData.count >= 7 && localStorage.getItem('tanha_vault_hint_shown') !== 'true') {
+             setShowVaultHint(true);
+          }
+        }
         setTimeout(() => setShowGrandFinale(true), 1000);
       }
       return updated;
@@ -138,7 +176,6 @@ export default function App() {
       <InteractionOverlay />
       <BackgroundParticles dayInfo={dayInfo} />
       <div className="grain-overlay" />
-      <LofiPlayer />
       <div 
         className="max-container flex flex-col pt-12 pb-32 overflow-y-auto no-scrollbar relative z-10"
         style={{ color: dayInfo.isDark ? '#FFFFFF' : '#2C1810' }}
@@ -158,6 +195,8 @@ export default function App() {
                 onAddTask={(t) => setTodayTasks(prev => [...prev, t])}
                 dayInfo={dayInfo}
                 setView={setView}
+                setIsWishBoxOpen={setIsWishBoxOpen}
+                streak={streak}
               />
             </motion.div>
           )}
@@ -176,6 +215,10 @@ export default function App() {
                   localStorage.setItem('tanha_anchor_tasks', JSON.stringify(newAnchors));
                 }}
                 onBack={() => setView('home')}
+                onRestartTour={() => {
+                  setView('home');
+                  setShowTour(true);
+                }}
               />
             </motion.div>
           )}
@@ -190,17 +233,6 @@ export default function App() {
               <More setView={setView} />
             </motion.div>
           )}
-          {currentView === 'wish-box' && (
-            <motion.div
-              key="wish-box"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 1.2, opacity: 0 }}
-              transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-            >
-              <WishBox onBack={() => setView('more')} />
-            </motion.div>
-          )}
           {/* ... keeping other views but wrapping them for liquid feel ... */}
           {currentView === 'cycle' && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="cycle"><CycleTracker onBack={() => setView('more')} /></motion.div>}
           {currentView === 'hair' && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="hair"><HairCare onBack={() => setView('more')} /></motion.div>}
@@ -210,7 +242,11 @@ export default function App() {
           {currentView === 'watch' && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="watch"><WatchWorld onBack={() => setView('more')} triggerCelebration={triggerCelebration} /></motion.div>}
           {currentView === 'diary' && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="diary"><Diary onBack={() => setView('more')} triggerCelebration={triggerCelebration} /></motion.div>}
           {currentView === 'medicines' && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="medicines"><Medicines onBack={() => setView('more')} triggerCelebration={triggerCelebration} /></motion.div>}
+          {currentView === 'sleep' && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="sleep"><SleepTracker onBack={() => setView('more')} dayInfo={dayInfo} /></motion.div>}
+          {currentView === 'vault' && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="vault"><LoveLetterVault onBack={() => setView('more')} /></motion.div>}
         </AnimatePresence>
+
+        <WishBoxSheet isOpen={isWishBoxOpen} onClose={() => setIsWishBoxOpen(false)} />
 
         <BottomNav 
           currentView={currentView} 
@@ -226,8 +262,59 @@ export default function App() {
             <WelcomePopup onDismiss={() => {
               setWelcomeShown(true);
               localStorage.setItem('tanha_welcome_shown', 'true');
+              // Start tour after welcome
+              if (localStorage.getItem('tanha_tour_shown') !== 'true') {
+                setTimeout(() => setShowTour(true), 1000);
+              }
             }} />
           )}
+
+          {welcomeShown && showNewFeatures && (
+            <NewFeaturesPopup 
+              isOpen={showNewFeatures} 
+              onDismiss={(openWish) => {
+                setShowNewFeatures(false);
+                localStorage.setItem('tanha_new_features_v2_shown', 'true');
+                if (openWish) setIsWishBoxOpen(true);
+              }} 
+            />
+          )}
+
+          {showTour && (
+            <AppTour onComplete={() => {
+              setShowTour(false);
+              localStorage.setItem('tanha_tour_shown', 'true');
+              triggerCelebration("Tour complete! Now go show today who is boss, Tanha 💪💖");
+            }} />
+          )}
+
+          {showVaultHint && (
+             <motion.div 
+               initial={{ opacity: 0, scale: 0.8 }}
+               animate={{ opacity: 1, scale: 1 }}
+               className="fixed inset-0 z-[2600] flex items-center justify-center bg-black/60 p-8"
+             >
+                <div className="glass-card p-10 text-center space-y-6 relative border-[#FFD54F]/20">
+                   <div className="text-6xl mb-4 animate-pulse">💌</div>
+                   <h2 className="text-2xl font-serif font-bold text-[#B76E79]">A Message for Tanha...</h2>
+                   <p className="font-accent italic text-lg leading-relaxed text-[#2C1810]">
+                     "Tanha... you have been so consistent 🥺<br/>
+                     I left something for you somewhere in this app.<br/>
+                     Find it 💌"
+                   </p>
+                   <button 
+                     onClick={() => {
+                       setShowVaultHint(false);
+                       localStorage.setItem('tanha_vault_hint_shown', 'true');
+                     }}
+                     className="w-full bg-[#B76E79] text-white py-4 rounded-xl font-bold shadow-lg"
+                   >
+                     I will find it! 🌸
+                   </button>
+                </div>
+             </motion.div>
+          )}
+
           {celebrationMessage && (
             <CelebrationPopup 
               message={celebrationMessage} 

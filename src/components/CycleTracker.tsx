@@ -47,6 +47,9 @@ export default function CycleTracker({ onBack }: Props) {
   const [showLogging, setShowLogging] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [showRevealPopup, setShowRevealPopup] = useState(() => {
+    return localStorage.getItem('tanha_period_reveal_shown') !== 'true';
+  });
 
   // Setup Form State
   const [setupData, setSetupData] = useState({
@@ -402,6 +405,34 @@ export default function CycleTracker({ onBack }: Props) {
                     Reset Data
                   </button>
                </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showRevealPopup && initialized && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 p-8">
+            <motion.div 
+               initial={{ opacity: 0, scale: 0.8 }}
+               animate={{ opacity: 1, scale: 1 }}
+               className="glass-card p-10 text-center space-y-6 relative border-[#F48FB1]/20 bg-gradient-to-b from-white to-[#FFF0F3]"
+            >
+               <div className="text-6xl mb-4 animate-bounce">🩸🌸🩹</div>
+               <h2 className="text-2xl font-serif font-bold text-[#C2185B]">My Cycle is Here! 🌸</h2>
+               <p className="font-accent italic text-lg leading-relaxed text-[#2C1810]">
+                 "This space was made to help you understand your body better, Tanha. <br/>
+                 Track your dates, your symptoms, and your moods — and I will be here to hold your hand through every phase. 💕"
+               </p>
+               <button 
+                 onClick={() => {
+                   setShowRevealPopup(false);
+                   localStorage.setItem('tanha_period_reveal_shown', 'true');
+                 }}
+                 className="w-full bg-[#B76E79] text-white py-4 rounded-xl font-bold shadow-lg shadow-[#B76E79]/20"
+               >
+                 Thank you, husband 🥺💖
+               </button>
             </motion.div>
           </div>
         )}

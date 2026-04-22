@@ -12,6 +12,8 @@ interface Props {
   onAddTask: (task: Task) => void;
   dayInfo: DayInfo;
   setView: (v: any) => void;
+  setIsWishBoxOpen: (o: boolean) => void;
+  streak: number;
 }
 
 const Sparkle = ({ x, y }: { x: number, y: number }) => {
@@ -28,11 +30,12 @@ const Sparkle = ({ x, y }: { x: number, y: number }) => {
   );
 };
 
-export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView }: Props) {
+export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView, setIsWishBoxOpen, streak }: Props) {
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', emoji: '✅', time: '' });
   const [error, setError] = useState('');
   const [sparkles, setSparkles] = useState<{ id: number, x: number, y: number }[]>([]);
+  const longPressTimer = useRef<any>(null);
   
   // High performance motion values
   const mouseX = useMotionValue(0);
@@ -101,6 +104,7 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView }: P
     // Self Care Nudges
     const bathLogs: BathLog[] = JSON.parse(localStorage.getItem('tanha_bath_logs') || '[]');
     const selfCareLogs: Record<string, SelfCareDailyLog> = JSON.parse(localStorage.getItem('tanha_self_care_logs') || '{}');
+    const sleepLogs: any[] = JSON.parse(localStorage.getItem('tanha_sleep_logs') || '[]');
     const bathedToday = bathLogs.some(l => l.date === todayStr);
 
     if (hour >= 18 && !bathedToday) {
@@ -115,8 +119,20 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView }: P
        }
     }
 
-    setNudges(newNudges);
+    const sleptToday = sleepLogs.some(l => l.date === todayStr);
+    if (hour >= 10 && !sleptToday) {
+      newNudges.push({ id: 'sleep-nudge', text: "How did you sleep last night, Tanha? 🌙💕", type: 'selfcare', icon: '🌙' });
+    }
+
+    const dismissed = JSON.parse(localStorage.getItem('tanha_dismissed_nudges') || '[]');
+    setNudges(newNudges.filter(n => !dismissed.includes(n.id)).slice(0, 2)); // Max 2
   }, []);
+
+  const removeNudge = (id: string) => {
+    setNudges(prev => prev.filter(n => n.id !== id));
+    const dismissed = JSON.parse(localStorage.getItem('tanha_dismissed_nudges') || '[]');
+    localStorage.setItem('tanha_dismissed_nudges', JSON.stringify([...dismissed, id]));
+  };
 
   const nowWatching = useMemo(() => {
     const watchItems: WatchItem[] = JSON.parse(localStorage.getItem('tanha_watch_items') || '[]');
@@ -134,8 +150,6 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView }: P
        next
     };
   }, []);
-
-  const removeNudge = (id: string) => setNudges(prev => prev.filter(n => n.id !== id));
 
   useEffect(() => {
     const handleOpenSheet = () => setShowAddSheet(true);
@@ -200,6 +214,7 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView }: P
       ))}
       
       <motion.header 
+        id="header-greeting"
         onMouseMove={handleHeaderMove}
         onMouseLeave={resetHeader}
         style={{ 
@@ -207,9 +222,19 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView }: P
           rotateY,
           perspective: 1000
         }}
-        className="py-4 flex justify-between items-start cursor-default"
+        className="py-4 flex justify-between items-start cursor-default select-none"
       >
-        <div className="space-y-1">
+        <div 
+          className="space-y-1"
+          onMouseDown={() => {
+            longPressTimer.current = setTimeout(() => setView('vault'), 3000);
+          }}
+          onMouseUp={() => clearTimeout(longPressTimer.current)}
+          onTouchStart={() => {
+            longPressTimer.current = setTimeout(() => setView('vault'), 3000);
+          }}
+          onTouchEnd={() => clearTimeout(longPressTimer.current)}
+        >
           <motion.h1 
             style={{ 
               x: shiftX, 
@@ -220,31 +245,31 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView }: P
           >
             {dayInfo.greeting}
           </motion.h1>
-          <p className="text-sm font-semibold opacity-70" style={{ color: dayInfo.isDark ? 'rgba(255,255,255,0.85)' : '#8B6F6F' }}>
+          <p className="text-sm font-semibold opacity-85" style={{ color: dayInfo.isDark ? '#FFFFFF' : '#634A4A' }}>
             {dayInfo.dateStr}
           </p>
-          <p className="text-xs font-accent italic opacity-60" style={{ color: dayInfo.isDark ? 'rgba(255,255,255,0.85)' : '#8B6F6F' }}>
+          <p className="text-xs font-accent italic opacity-75" style={{ color: dayInfo.isDark ? '#FFFFFF' : '#8B6F6F' }}>
             Today's vibe: {dayInfo.vibe}
           </p>
         </div>
         <div className="flex items-center gap-3 mt-2">
-          <div className="flex items-center gap-1 text-[#B76E79] font-bold">
+          <div id="streak-counter" className="flex items-center gap-1 text-[#B76E79] font-bold">
             <span>🔥</span>
-            <span>7</span>
+            <span>{streak}</span>
           </div>
-          <button className="text-[#8B6F6F]/40"><Settings size={20} /></button>
+          <button className="text-[#8B6F6F] hover:text-[#B76E79] transition-colors"><Settings size={20} /></button>
         </div>
       </motion.header>
 
       <section className="flex gap-4 h-44">
-        <div className="flex-[1.2] glass-card p-5 flex flex-col justify-between">
+        <div id="love-note-card" className="flex-[1.2] glass-card p-5 flex flex-col justify-between">
            <span className="text-[10px] font-bold tracking-[0.15em] text-[#B76E79] uppercase">💗 Daily Love Note</span>
            <p className="text-sm font-accent italic leading-relaxed text-[#2C1810] line-clamp-4">
              "{quote}"
            </p>
            <span className="text-[9px] font-bold text-[#B76E79] tracking-widest uppercase">Just for you, Tanha 🌸</span>
         </div>
-        <div className="flex-1 bg-gradient-to-br from-[#B76E79] to-[#D4A5A5] rounded-[24px] p-5 flex flex-col items-center justify-center text-white shadow-lg space-y-2">
+        <div id="progress-card" className="flex-1 bg-gradient-to-br from-[#B76E79] to-[#D4A5A5] rounded-[24px] p-5 flex flex-col items-center justify-center text-white shadow-lg space-y-2">
            <div className="relative w-16 h-16 flex items-center justify-center">
               <svg className="absolute inset-0 w-full h-full -rotate-90">
                  <circle cx="32" cy="32" r="30" fill="transparent" stroke="rgba(255,255,255,0.2)" strokeWidth="4" />
@@ -277,7 +302,7 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView }: P
                 </p>
                 <button 
                   onClick={() => removeNudge(nudge.id)}
-                  className="p-1 rounded-full hover:bg-black/5 opacity-40 shrink-0"
+                  className="p-1 rounded-full hover:bg-black/5 text-[#8B6F6F] hover:text-[#B76E79] shrink-0 transition-colors"
                 >
                   <X size={14} />
                 </button>
@@ -288,16 +313,16 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView }: P
       </AnimatePresence>
 
       <div className="space-y-8">
-        <div className="space-y-4">
+        <div id="anchor-tasks-section" className="space-y-4">
            <h3 className="text-xs font-bold tracking-[0.15em] text-[#8B3A52] uppercase px-1">🔒 Anchor Tasks</h3>
            <div className="space-y-3">
-              {anchorTasks.map(task => (
-                <TaskItem key={task.id} task={task} onToggle={onToggle} onSparkle={handleSparkle} />
+              {anchorTasks.map((task, i) => (
+                <TaskItem key={task.id} task={task} onToggle={onToggle} onSparkle={handleSparkle} id={i === 0 ? 'first-chore-checkbox' : undefined} />
               ))}
            </div>
         </div>
 
-        <div className="space-y-4">
+        <div id="today-tasks-section" className="space-y-4">
            <h3 className="text-xs font-bold tracking-[0.15em] text-[#8B3A52] uppercase px-1">📋 Today's Tasks</h3>
            <div className="space-y-3">
               {todayTasks.length === 0 ? (
@@ -339,10 +364,10 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView }: P
                 <Play size={10} /> Now Watching
              </div>
              <p className="font-nunito font-bold text-xs truncate text-[#2C1810]">{nowWatching.title}</p>
-             <div className="h-1 w-full bg-[#B76E79]/10 rounded-full overflow-hidden">
+             <div className="h-1 w-full bg-[#B76E79]/20 rounded-full overflow-hidden">
                 <div className="h-full bg-[#B76E79]" style={{ width: '40%' }} />
              </div>
-             <span className="text-[8px] font-bold text-[#8B6F6F] block">S{nowWatching.currentSeason || 1} • Ep {nowWatching.currentEpisode || 0}</span>
+             <span className="text-[8px] font-bold text-[#634A4A] block">S{nowWatching.currentSeason || 1} • Ep {nowWatching.currentEpisode || 0}</span>
           </motion.div>
         )}
 
@@ -358,13 +383,25 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView }: P
              <p className="font-nunito font-bold text-xs text-[#2C1810]">
                {medDoses.taken === medDoses.total ? 'All Taken! ✨' : `Next: ${medDoses.next?.scheduledTime || '--:--'}`}
              </p>
-             <div className="h-1 w-full bg-[#C2185B]/10 rounded-full overflow-hidden">
+             <div className="h-1 w-full bg-[#C2185B]/20 rounded-full overflow-hidden">
                 <div className="h-full bg-[#C2185B]" style={{ width: `${(medDoses.taken / medDoses.total) * 100}%` }} />
              </div>
-             <span className="text-[8px] font-bold text-[#8B6F6F] block">{medDoses.taken}/{medDoses.total} doses done</span>
+             <span className="text-[8px] font-bold text-[#634A4A] block">{medDoses.taken}/{medDoses.total} doses done</span>
           </motion.div>
         )}
       </div>
+
+      <motion.button 
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        animate={{ y: [0, -5, 0] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        onClick={() => setIsWishBoxOpen(true)}
+        className="fixed bottom-24 right-6 w-12 h-12 bg-white rounded-full shadow-xl flex items-center justify-center text-2xl z-40 border border-[#B76E79]/10"
+        style={{ boxShadow: '0 0 20px rgba(183,110,121,0.2)' }}
+      >
+        🪄
+      </motion.button>
 
       <AnimatePresence>
         {showAddSheet && (
@@ -425,9 +462,10 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView }: P
   );
 }
 
-function TaskItem({ task, onToggle, onSparkle }: { task: Task, onToggle: (id: string) => void, onSparkle: (e: React.MouseEvent) => void }) {
+function TaskItem({ task, onToggle, onSparkle, id }: { task: Task, onToggle: (id: string) => void, onSparkle: (e: React.MouseEvent) => void, id?: string }) {
   return (
     <motion.div 
+      id={id}
       layout
       whileHover={{ scale: 1.02, rotateX: 2, rotateY: 2 }}
       whileTap={{ scale: 0.98 }}
@@ -439,10 +477,10 @@ function TaskItem({ task, onToggle, onSparkle }: { task: Task, onToggle: (id: st
     >
        <span className="text-2xl">{task.emoji}</span>
        <div className="flex-1 min-w-0">
-          <p className={`font-nunito font-bold truncate ${task.completed ? 'line-through text-[#8B6F6F] opacity-50' : 'text-[#2C1810]'}`}>
+          <p className={`font-nunito font-bold truncate ${task.completed ? 'line-through text-[#8B6F6F] opacity-70' : 'text-[#2C1810]'}`}>
             {task.title}
           </p>
-          {task.time && <span className="text-[10px] font-bold text-[#8B6F6F]/60 uppercase tracking-widest">{task.time}</span>}
+          {task.time && <span className="text-[10px] font-bold text-[#634A4A] uppercase tracking-widest">{task.time}</span>}
        </div>
        <button 
          onClick={(e) => {

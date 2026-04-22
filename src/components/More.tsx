@@ -15,74 +15,57 @@ const MENU_ITEMS = [
   { id: 'watch', label: 'Watch World', emoji: '🎬', color: '#C2185B', path: 'watch' },
   { id: 'diary', label: 'My Diary', emoji: '📖', color: '#B76E79', path: 'diary' },
   { id: 'medicines', label: 'Medicines', emoji: '💊', color: '#F48FB1', path: 'medicines' },
-  { id: 'wish-box', label: 'Wish Box', emoji: '🎁', color: '#FFD54F', path: 'wish-box' },
-  { id: 'sleep', label: 'Sleep', emoji: '🌙', color: '#9C7BB5', comingSoon: true },
-  { id: 'love', label: '', emoji: '💌', color: '#B76E79', comingSoon: true },
+  { id: 'sleep', label: 'Sleep Tracker', emoji: '🌙', color: '#9C7BB5', path: 'sleep' },
+  { id: 'vault', label: '', emoji: '💌', color: '#B76E79', path: 'vault' },
 ];
 
 export default function More({ setView }: Props) {
   return (
-    <div className="min-h-screen pt-10 pb-32 px-6 animate-breathing" style={{ background: 'linear-gradient(to bottom, #FFF0F3, #FFE4EC, #F8E8FF)' }}>
-      <div className="text-center mb-10">
-        <h2 className="text-4xl font-serif font-bold text-[#B76E79]">Explore More 🌸</h2>
-      </div>
+    <div 
+      className="fixed inset-0 z-[60] overflow-y-auto no-scrollbar bg-[#FDFAF7]" 
+      style={{ background: 'linear-gradient(135deg, #FFF0F3 0%, #FFE4EC 50%, #F8E8FF 100%)' }}
+    >
+      <div className="max-w-[480px] mx-auto min-h-screen px-4 pt-10 pb-32 flex flex-col">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-serif font-bold text-[#B76E79] tracking-tight">Explore More 🌸</h2>
+          <div className="w-12 h-1 bg-[#B76E79]/20 mx-auto mt-2 rounded-full" />
+        </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        {MENU_ITEMS.map((item, idx) => (
-          <motion.div
-            key={item.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.05 }}
-            className="relative"
-            style={{ perspective: 1000 }}
-          >
-            <motion.button
-              disabled={item.comingSoon}
-              onClick={() => item.path && setView(item.path as View)}
-              whileHover={item.comingSoon ? {} : { 
-                scale: 1.02, 
-                rotateY: 5, 
-                rotateX: -5,
-                backgroundColor: 'rgba(255, 255, 255, 0.9)'
-              }}
-              whileTap={item.comingSoon ? {} : { scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 400, damping: 25 }}
-              className={`w-full aspect-[4/5] bg-white/70 backdrop-blur-md rounded-[32px] border border-white/40 shadow-sm flex flex-col items-center justify-center gap-4 transition-all ${
-                item.comingSoon ? 'opacity-60 grayscale-[0.3]' : 'hover:shadow-2xl'
-              }`}
+        <div className="grid grid-cols-2 gap-4">
+          {MENU_ITEMS.map((item, idx) => (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.03, ease: "easeOut" }}
             >
-              <motion.div 
-                animate={item.comingSoon ? {} : { y: [0, -6, 0] }}
-                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut", delay: idx * 0.1 }}
-                whileHover={item.comingSoon ? {} : { 
-                  scale: 1.1,
-                  boxShadow: `0 20px 40px -10px ${item.color}bb, inset 0 2px 4px rgba(255,255,255,0.6)`
-                }}
-                className="w-16 h-16 rounded-[24px] flex items-center justify-center text-3xl relative overflow-hidden group shadow-lg"
-                style={{ 
-                  background: `linear-gradient(135deg, ${item.color}ff, ${item.color}cc)`,
-                  boxShadow: `0 10px 20px -8px ${item.color}88, inset 0 2px 4px rgba(255,255,255,0.5)`
-                }}
+              <motion.button
+                onClick={() => item.path && setView(item.path as View)}
+                whileTap={{ scale: 0.95 }}
+                className="w-full aspect-[1/1.1] relative bg-white/95 rounded-3xl border border-[#B76E79]/10 shadow-[0_8px_20px_-10px_rgba(183,110,121,0.2)] flex flex-col items-center justify-center gap-3 transition-all active:shadow-inner"
               >
-                {/* Shine Effect */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent -translate-x-full animate-shimmer" />
-                <span className="drop-shadow-md z-10">{item.emoji}</span>
-              </motion.div>
-              <span className="font-nunito font-black text-[13px] tracking-tight text-[#2C1810]">
-                {item.label}
-              </span>
-              
-              {item.comingSoon && (
-                <div className="absolute inset-0 bg-white/10 rounded-[24px] flex items-center justify-center">
-                  <span className="bg-[#B76E79] text-white text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full shadow-sm">
-                    Coming Soon 💕
-                  </span>
+                <div 
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-sm transform transition-transform group-active:scale-110"
+                  style={{ background: item.color }}
+                >
+                  <span className="drop-shadow-sm">{item.emoji}</span>
                 </div>
-              )}
-            </motion.button>
-          </motion.div>
-        ))}
+                <span className="font-nunito font-bold text-[13px] text-[#2C1810]">
+                  {item.label}
+                </span>
+                
+                {/* Subtle shine overlay */}
+                <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+                  <div className="absolute top-0 left-0 w-full h-1/2 bg-white/5 skew-y-12 transform -translate-y-full" />
+                </div>
+              </motion.button>
+            </motion.div>
+          ))}
+        </div>
+        
+        <p className="mt-12 text-center text-[10px] uppercase font-black tracking-[0.2em] text-[#B76E79]/50">
+          Curated for Tanha 💖
+        </p>
       </div>
     </div>
   );
