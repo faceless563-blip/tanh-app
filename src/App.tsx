@@ -18,12 +18,15 @@ import WishBoxSheet from './components/WishBoxSheet';
 import SleepTracker from './components/SleepTracker';
 import LoveLetterVault from './components/LoveLetterVault';
 import AppTour from './components/AppTour';
+import BirthdayJourney from './components/BirthdayJourney';
 import NewFeaturesPopup from './components/NewFeaturesPopup';
 import BackgroundParticles from './components/BackgroundParticles';
 import InteractionOverlay from './components/InteractionOverlay';
 import BottomNav from './components/BottomNav';
 import CelebrationPopup from './components/CelebrationPopup';
 import WelcomePopup from './components/WelcomePopup';
+import OfflinePage from './components/OfflinePage';
+import InstallBanner from './components/InstallBanner';
 import { format } from 'date-fns';
 
 export default function App() {
@@ -68,6 +71,18 @@ export default function App() {
 
   const [celebrationMessage, setCelebrationMessage] = useState<string | null>(null);
   const [showGrandFinale, setShowGrandFinale] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const dayInfo = useMemo(() => getDayInfo(), [new Date().getHours()]);
 
@@ -173,6 +188,8 @@ export default function App() {
       className="min-h-screen transition-all duration-[2000ms] ease-in-out relative overflow-hidden" 
       style={{ background: dayInfo.gradient }}
     >
+      <InstallBanner />
+      {!isOnline && <OfflinePage />}
       <InteractionOverlay />
       <BackgroundParticles dayInfo={dayInfo} />
       <div className="grain-overlay" />
@@ -244,6 +261,17 @@ export default function App() {
           {currentView === 'medicines' && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="medicines"><Medicines onBack={() => setView('more')} triggerCelebration={triggerCelebration} /></motion.div>}
           {currentView === 'sleep' && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="sleep"><SleepTracker onBack={() => setView('more')} dayInfo={dayInfo} /></motion.div>}
           {currentView === 'vault' && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="vault"><LoveLetterVault onBack={() => setView('more')} /></motion.div>}
+          {currentView === 'birthday-journey' && (
+            <motion.div 
+              key="birthday-journey"
+              initial={{ opacity: 0, x: 100 }} 
+              animate={{ opacity: 1, x: 0 }} 
+              exit={{ opacity: 0, x: -100 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            >
+              <BirthdayJourney onBack={() => setView('home')} />
+            </motion.div>
+          )}
         </AnimatePresence>
 
         <WishBoxSheet isOpen={isWishBoxOpen} onClose={() => setIsWishBoxOpen(false)} />

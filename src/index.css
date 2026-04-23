@@ -115,7 +115,32 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+@keyframes float-petal {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.8; }
+  90% { opacity: 0.8; }
+  100% { transform: translate(100px, 500px) rotate(360deg); opacity: 0; }
+}
+
+.animate-petal {
+  animation: float-petal 10s linear infinite;
+}
+
+@keyframes tree-glow {
+  0%, 100% { filter: drop-shadow(0 0 10px rgba(183,110,121,0.3)); }
+  50% { filter: drop-shadow(0 0 25px rgba(183,110,121,0.6)); }
+}
+
+.animate-tree-glow {
+  animation: tree-glow 4s ease-in-out infinite;
+}
+
+@keyframes path-dash {
+  to { stroke-dashoffset: 0; }
+}
+
+.animate-path-dash {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: path-dash 5s ease-out forwards;
 }

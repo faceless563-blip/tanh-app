@@ -22,7 +22,14 @@ export type View =
   | 'medicines'
   | 'wish-box'
   | 'sleep'
-  | 'vault';
+  | 'vault'
+  | 'birthday-journey';
+
+export interface BirthdayJourneyNote {
+  day: number;
+  message: string;
+  isVoice?: boolean;
+}
 
 export interface SleepLog {
   id: string;

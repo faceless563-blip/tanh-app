@@ -7,6 +7,7 @@ interface Props {
 }
 
 const MENU_ITEMS = [
+  { id: 'birthday-journey', label: 'B-Day Journey', emoji: '🎂', color: '#FFF0F3', path: 'birthday-journey' },
   { id: 'cycle', label: 'My Cycle', emoji: '🌸', color: '#F48FB1', path: 'cycle' },
   { id: 'hair', label: 'Hair Care', emoji: '💆', color: '#FFAB91', path: 'hair' },
   { id: 'dates', label: 'Important Dates', emoji: '📅', color: '#CE93D8', path: 'dates' },

@@ -209,6 +209,11 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView, set
 
   return (
     <div className="space-y-8 px-6 pb-20 relative">
+      {/* Visual Debug Tag - can remove later */}
+      <div className="fixed top-2 left-1/2 -translate-x-1/2 z-[9999] bg-black/80 text-white text-[8px] px-2 py-0.5 rounded-full font-mono opacity-20 pointer-events-none">
+        v2.Journey.Active
+      </div>
+
       {sparkles.map(s => (
         <Sparkle key={s.id} x={s.x} y={s.y} />
       ))}
@@ -253,11 +258,18 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView, set
           </p>
         </div>
         <div className="flex items-center gap-3 mt-2">
+          <button 
+            onClick={() => setView('birthday-journey')}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FFF0F3] rounded-full border border-[#B76E79]/20 group transition-all hover:bg-white"
+          >
+            <span className="text-sm scale-110 group-hover:animate-bounce">🎂</span>
+            <span className="text-[10px] font-bold text-[#B76E79] uppercase tracking-tighter">Journey</span>
+          </button>
           <div id="streak-counter" className="flex items-center gap-1 text-[#B76E79] font-bold">
             <span>🔥</span>
             <span>{streak}</span>
           </div>
-          <button className="text-[#8B6F6F] hover:text-[#B76E79] transition-colors"><Settings size={20} /></button>
+          <button onClick={() => setView('settings')} className="text-[#8B6F6F] hover:text-[#B76E79] transition-colors"><Settings size={20} /></button>
         </div>
       </motion.header>
 
@@ -283,6 +295,32 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView, set
            <span className="text-[10px] opacity-70">{completedCount} Tasks Done ✨</span>
         </div>
       </section>
+
+      {/* Birthday Journey Quick Access */}
+      <motion.button 
+        onClick={() => setView('birthday-journey')}
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.98 }}
+        className="w-full glass-card p-5 bg-gradient-to-r from-[#FFF0F3] to-[#FFE4EC] border-[#B76E79]/20 flex items-center justify-between group overflow-hidden"
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+            🎂
+          </div>
+          <div className="text-left">
+            <h4 className="text-sm font-bold text-[#B76E79]">Birthday Journey</h4>
+            <p className="text-[11px] text-[#8B6F6F] font-nunito font-semibold">Track your blooms for July 31st 🌸</p>
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <span className="text-[10px] font-black text-[#B76E79] uppercase tracking-widest">99 Days To Go</span>
+          <div className="flex gap-0.5">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className={`w-1.5 h-1.5 rounded-full ${i < 1 ? 'bg-[#B76E79]' : 'bg-[#B76E79]/20'}`} />
+            ))}
+          </div>
+        </div>
+      </motion.button>
 
       {/* Nudges Section */}
       <AnimatePresence>
