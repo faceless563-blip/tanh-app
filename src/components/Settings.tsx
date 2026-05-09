@@ -82,9 +82,30 @@ export default function Settings({ anchorTasks, onUpdateAnchors, onBack, onResta
         <div className="space-y-3">
            <button 
              onClick={onRestartTour}
-             className="w-full glass-card p-5 text-left font-bold text-[#B76E79] flex items-center justify-between"
+             className="w-full glass-card p-5 text-left font-bold text-[#634A4A] flex items-center justify-between"
            >
              Take App Tour Again 🌸
+             <ChevronLeft size={18} className="rotate-180 opacity-40" />
+           </button>
+           
+           <button 
+             onClick={() => {
+                const old = prompt('Enter your old password:');
+                if (old === localStorage.getItem('tanha_app_password')) {
+                   const newVal = prompt('Enter NEW password (min 4 chars):');
+                   if (newVal && newVal.length >= 4) {
+                      localStorage.setItem('tanha_app_password', newVal);
+                      alert('Password updated successfully! 🔒');
+                   } else {
+                      alert('Password must be at least 4 characters.');
+                   }
+                } else {
+                   alert('Incorrect old password.');
+                }
+             }}
+             className="w-full glass-card p-5 text-left font-bold text-[#B76E79] flex items-center justify-between"
+           >
+             Change App Password 🔒
              <ChevronLeft size={18} className="rotate-180 opacity-40" />
            </button>
         </div>

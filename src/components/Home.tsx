@@ -273,120 +273,124 @@ export default function Home({ tasks, onToggle, onAddTask, dayInfo, setView, set
         </div>
       </motion.header>
 
-      <section className="flex gap-4 h-44">
-        <div id="love-note-card" className="flex-[1.2] glass-card p-5 flex flex-col justify-between">
-           <span className="text-[10px] font-bold tracking-[0.15em] text-[#B76E79] uppercase">💗 Daily Love Note</span>
-           <p className="text-sm font-accent italic leading-relaxed text-[#2C1810] line-clamp-4">
-             "{quote}"
-           </p>
-           <span className="text-[9px] font-bold text-[#B76E79] tracking-widest uppercase">Just for you, Tanha 🌸</span>
-        </div>
-        <div id="progress-card" className="flex-1 bg-gradient-to-br from-[#B76E79] to-[#D4A5A5] rounded-[24px] p-5 flex flex-col items-center justify-center text-white shadow-lg space-y-2">
-           <div className="relative w-16 h-16 flex items-center justify-center">
-              <svg className="absolute inset-0 w-full h-full -rotate-90">
-                 <circle cx="32" cy="32" r="30" fill="transparent" stroke="rgba(255,255,255,0.2)" strokeWidth="4" />
-                 <circle cx="32" cy="32" r="30" fill="transparent" stroke="white" strokeWidth="4" 
-                   strokeDasharray={188.4} strokeDashoffset={188.4 - (progress / 100) * 188.4} strokeLinecap="round" className="transition-all duration-1000" />
-              </svg>
-              <Heart size={20} className="fill-white" />
-           </div>
-           <span className="text-4xl font-serif font-bold">{progress}%</span>
-           <span className="text-[9px] font-bold tracking-widest uppercase opacity-80">Today's Progress</span>
-           <span className="text-[10px] opacity-70">{completedCount} Tasks Done ✨</span>
-        </div>
-      </section>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+        <div className="space-y-8">
+          <section className="flex gap-4 h-44">
+            <div id="love-note-card" className="flex-[1.2] glass-card p-5 flex flex-col justify-between">
+              <span className="text-[10px] font-bold tracking-[0.15em] text-[#B76E79] uppercase">💗 Daily Love Note</span>
+              <p className="text-sm font-accent italic leading-relaxed text-[#2C1810] line-clamp-4">
+                "{quote}"
+              </p>
+              <span className="text-[9px] font-bold text-[#B76E79] tracking-widest uppercase">Just for you, Tanha 🌸</span>
+            </div>
+            <div id="progress-card" className="flex-1 bg-gradient-to-br from-[#B76E79] to-[#D4A5A5] rounded-[24px] p-5 flex flex-col items-center justify-center text-white shadow-lg space-y-2">
+              <div className="relative w-16 h-16 flex items-center justify-center">
+                  <svg className="absolute inset-0 w-full h-full -rotate-90">
+                    <circle cx="32" cy="32" r="30" fill="transparent" stroke="rgba(255,255,255,0.2)" strokeWidth="4" />
+                    <circle cx="32" cy="32" r="30" fill="transparent" stroke="white" strokeWidth="4" 
+                        strokeDasharray={188.4} strokeDashoffset={188.4 - (progress / 100) * 188.4} strokeLinecap="round" className="transition-all duration-1000" />
+                  </svg>
+                  <Heart size={20} className="fill-white" />
+              </div>
+              <span className="text-4xl font-serif font-bold">{progress}%</span>
+              <span className="text-[9px] font-bold tracking-widest uppercase opacity-80">Today's Progress</span>
+              <span className="text-[10px] opacity-70">{completedCount} Tasks Done ✨</span>
+            </div>
+          </section>
 
-      {/* Birthday Journey Quick Access */}
-      <motion.button 
-        onClick={() => setView('birthday-journey')}
-        whileHover={{ scale: 1.01 }}
-        whileTap={{ scale: 0.98 }}
-        className="w-full glass-card p-5 bg-gradient-to-r from-[#FFF0F3] to-[#FFE4EC] border-[#B76E79]/20 flex items-center justify-between group overflow-hidden"
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-            🎂
-          </div>
-          <div className="text-left">
-            <h4 className="text-sm font-bold text-[#B76E79]">Birthday Journey</h4>
-            <p className="text-[11px] text-[#8B6F6F] font-nunito font-semibold">Track your blooms for July 31st 🌸</p>
-          </div>
-        </div>
-        <div className="flex flex-col items-end gap-1">
-          <span className="text-[10px] font-black text-[#B76E79] uppercase tracking-widest">99 Days To Go</span>
-          <div className="flex gap-0.5">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className={`w-1.5 h-1.5 rounded-full ${i < 1 ? 'bg-[#B76E79]' : 'bg-[#B76E79]/20'}`} />
-            ))}
-          </div>
-        </div>
-      </motion.button>
+          {/* Birthday Journey Quick Access */}
+          <motion.button 
+            onClick={() => setView('birthday-journey')}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full glass-card p-5 bg-gradient-to-r from-[#FFF0F3] to-[#FFE4EC] border-[#B76E79]/20 flex items-center justify-between group overflow-hidden"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                🎂
+              </div>
+              <div className="text-left">
+                <h4 className="text-sm font-bold text-[#B76E79]">Birthday Journey</h4>
+                <p className="text-[11px] text-[#8B6F6F] font-nunito font-semibold">Track your blooms for July 31st 🌸</p>
+              </div>
+            </div>
+            <div className="flex flex-col items-end gap-1">
+              <span className="text-[10px] font-black text-[#B76E79] uppercase tracking-widest">99 Days To Go</span>
+              <div className="flex gap-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className={`w-1.5 h-1.5 rounded-full ${i < 1 ? 'bg-[#B76E79]' : 'bg-[#B76E79]/20'}`} />
+                ))}
+              </div>
+            </div>
+          </motion.button>
 
-      {/* Nudges Section */}
-      <AnimatePresence>
-        {nudges.length > 0 && (
-          <div className="space-y-3">
-            {nudges.map(nudge => (
-              <motion.div 
-                key={nudge.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className={`glass-card p-4 flex items-center gap-4 relative overflow-hidden ${nudge.type === 'date' ? 'bg-gradient-to-r from-[#FFF0F3] to-[#FFE4EC] border-none' : 'bg-white/60'}`}
-              >
-                <span className="text-2xl">{nudge.icon}</span>
-                <p className={`flex-1 font-nunito font-bold text-xs ${nudge.type === 'date' ? 'text-[#C2185B]' : 'text-[#8B6F6F]'}`}>
-                  {nudge.text}
-                </p>
-                <button 
-                  onClick={() => removeNudge(nudge.id)}
-                  className="p-1 rounded-full hover:bg-black/5 text-[#8B6F6F] hover:text-[#B76E79] shrink-0 transition-colors"
-                >
-                  <X size={14} />
-                </button>
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </AnimatePresence>
-
-      <div className="space-y-8">
-        <div id="anchor-tasks-section" className="space-y-4">
-           <h3 className="text-xs font-bold tracking-[0.15em] text-[#8B3A52] uppercase px-1">🔒 Anchor Tasks</h3>
-           <div className="space-y-3">
-              {anchorTasks.map((task, i) => (
-                <TaskItem key={task.id} task={task} onToggle={onToggle} onSparkle={handleSparkle} id={i === 0 ? 'first-chore-checkbox' : undefined} />
-              ))}
-           </div>
-        </div>
-
-        <div id="today-tasks-section" className="space-y-4">
-           <h3 className="text-xs font-bold tracking-[0.15em] text-[#8B3A52] uppercase px-1">📋 Today's Tasks</h3>
-           <div className="space-y-3">
-              {todayTasks.length === 0 ? (
-                <motion.div 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-center py-10 space-y-4 relative"
-                >
-                  <motion.div
-                    animate={{ 
-                      y: [0, -10, 0],
-                      rotate: [0, 5, -5, 0]
-                    }}
-                    transition={{ duration: 6, repeat: Infinity }}
-                    className="text-6xl"
+          {/* Nudges Section */}
+          <AnimatePresence>
+            {nudges.length > 0 && (
+              <div className="space-y-3">
+                {nudges.map(nudge => (
+                  <motion.div 
+                    key={nudge.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className={`glass-card p-4 flex items-center gap-4 relative overflow-hidden ${nudge.type === 'date' ? 'bg-gradient-to-r from-[#FFF0F3] to-[#FFE4EC] border-none' : 'bg-white/60'}`}
                   >
-                    🦋
+                    <span className="text-2xl">{nudge.icon}</span>
+                    <p className={`flex-1 font-nunito font-bold text-xs ${nudge.type === 'date' ? 'text-[#C2185B]' : 'text-[#8B6F6F]'}`}>
+                      {nudge.text}
+                    </p>
+                    <button 
+                      onClick={() => removeNudge(nudge.id)}
+                      className="p-1 rounded-full hover:bg-black/5 text-[#8B6F6F] hover:text-[#B76E79] shrink-0 transition-colors"
+                    >
+                      <X size={14} />
+                    </button>
                   </motion.div>
-                  <p className="font-accent italic text-[#8B6F6F]">Nothing added yet 🌸<br/>Tap + to add something for today 💕</p>
-                </motion.div>
-              ) : (
-                todayTasks.map(task => (
-                  <TaskItem key={task.id} task={task} onToggle={onToggle} onSparkle={handleSparkle} />
-                ))
-              )}
-           </div>
+                ))}
+              </div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="space-y-8">
+          <div id="anchor-tasks-section" className="space-y-4">
+            <h3 className="text-xs font-bold tracking-[0.15em] text-[#8B3A52] uppercase px-1">🔒 Anchor Tasks</h3>
+            <div className="space-y-3">
+                {anchorTasks.map((task, i) => (
+                  <TaskItem key={task.id} task={task} onToggle={onToggle} onSparkle={handleSparkle} id={i === 0 ? 'first-chore-checkbox' : undefined} />
+                ))}
+            </div>
+          </div>
+
+          <div id="today-tasks-section" className="space-y-4">
+            <h3 className="text-xs font-bold tracking-[0.15em] text-[#8B3A52] uppercase px-1">📋 Today's Tasks</h3>
+            <div className="space-y-3">
+                {todayTasks.length === 0 ? (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-center py-10 space-y-4 relative"
+                  >
+                    <motion.div
+                      animate={{ 
+                        y: [0, -10, 0],
+                        rotate: [0, 5, -5, 0]
+                      }}
+                      transition={{ duration: 6, repeat: Infinity }}
+                      className="text-6xl"
+                    >
+                      🦋
+                    </motion.div>
+                    <p className="font-accent italic text-[#8B6F6F]">Nothing added yet 🌸<br/>Tap + to add something for today 💕</p>
+                  </motion.div>
+                ) : (
+                  todayTasks.map(task => (
+                    <TaskItem key={task.id} task={task} onToggle={onToggle} onSparkle={handleSparkle} />
+                  ))
+                )}
+            </div>
+          </div>
         </div>
       </div>
 

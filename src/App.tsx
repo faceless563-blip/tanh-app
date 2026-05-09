@@ -27,9 +27,11 @@ import CelebrationPopup from './components/CelebrationPopup';
 import WelcomePopup from './components/WelcomePopup';
 import OfflinePage from './components/OfflinePage';
 import InstallBanner from './components/InstallBanner';
+import Gatekeeper from './components/Gatekeeper';
 import { format } from 'date-fns';
 
 export default function App() {
+  const [isUnlocked, setIsUnlocked] = useState(false);
   const [currentView, setView] = useState<View>('home');
   const [onboardingComplete, setOnboardingComplete] = useState<boolean>(() => {
     return localStorage.getItem('tanha_onboarding_complete') === 'true';
@@ -184,39 +186,49 @@ export default function App() {
   }
 
   return (
-    <div 
-      className="min-h-screen transition-all duration-[2000ms] ease-in-out relative overflow-hidden" 
-      style={{ background: dayInfo.gradient }}
-    >
-      <InstallBanner />
-      {!isOnline && <OfflinePage />}
-      <InteractionOverlay />
-      <BackgroundParticles dayInfo={dayInfo} />
-      <div className="grain-overlay" />
-      <div 
-        className="max-container flex flex-col pt-12 pb-32 overflow-y-auto no-scrollbar relative z-10"
-        style={{ color: dayInfo.isDark ? '#FFFFFF' : '#2C1810' }}
-      >
-        <AnimatePresence mode="wait">
-          {currentView === 'home' && (
-            <motion.div
-              key="home"
-              initial={{ filter: "blur(20px)", opacity: 0, scale: 1.1 }}
-              animate={{ filter: "blur(0px)", opacity: 1, scale: 1 }}
-              exit={{ filter: "blur(20px)", opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-            >
-              <Home 
-                tasks={todayTasks} 
-                onToggle={handleTaskToggle}
-                onAddTask={(t) => setTodayTasks(prev => [...prev, t])}
-                dayInfo={dayInfo}
-                setView={setView}
-                setIsWishBoxOpen={setIsWishBoxOpen}
-                streak={streak}
-              />
-            </motion.div>
-          )}
+    <AnimatePresence mode="wait">
+      {!isUnlocked ? (
+        <motion.div key="lock" exit={{ opacity: 0, scale: 1.1, filter: 'blur(20px)' }} transition={{ duration: 0.8 }}>
+          <Gatekeeper onUnlock={() => setIsUnlocked(true)} />
+        </motion.div>
+      ) : (
+        <motion.div 
+          key="app"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="min-h-screen transition-all duration-[2000ms] ease-in-out relative overflow-hidden" 
+          style={{ background: dayInfo.gradient }}
+        >
+          <InstallBanner />
+          {!isOnline && <OfflinePage />}
+          <InteractionOverlay />
+          <BackgroundParticles dayInfo={dayInfo} />
+          <div className="grain-overlay" />
+          <div 
+            className="max-container flex flex-col pt-12 pb-32 overflow-y-auto no-scrollbar relative z-10"
+            style={{ color: dayInfo.isDark ? '#FFFFFF' : '#2C1810' }}
+          >
+            <AnimatePresence mode="wait">
+              {currentView === 'home' && (
+                <motion.div
+                  key="home"
+                  className="w-full h-full lg:flex lg:gap-10"
+                  initial={{ filter: "blur(20px)", opacity: 0, scale: 1.1 }}
+                  animate={{ filter: "blur(0px)", opacity: 1, scale: 1 }}
+                  exit={{ filter: "blur(20px)", opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+                >
+                  <Home 
+                    tasks={todayTasks} 
+                    onToggle={handleTaskToggle}
+                    onAddTask={(t) => setTodayTasks(prev => [...prev, t])}
+                    dayInfo={dayInfo}
+                    setView={setView}
+                    setIsWishBoxOpen={setIsWishBoxOpen}
+                    streak={streak}
+                  />
+                </motion.div>
+              )}
           {currentView === 'settings' && (
             <motion.div
               key="settings"
@@ -364,7 +376,7 @@ export default function App() {
                  </p>
                  <button 
                    onClick={() => setShowGrandFinale(false)}
-                   className="w-full bg-[#B76E79] text-white py-4 rounded-xl font-bold shadow-lg"
+                   className="w-full bg-[#C2185B] text-white py-4 rounded-xl font-bold shadow-lg"
                  >
                    You're the best! 🥰
                  </button>
@@ -373,6 +385,8 @@ export default function App() {
           )}
         </AnimatePresence>
       </div>
-    </div>
-  );
+    </motion.div>
+  )}
+</AnimatePresence>
+);
 }

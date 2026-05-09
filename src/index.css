@@ -26,7 +26,13 @@ body {
 }
 
 .max-container {
-  @apply max-w-[480px] mx-auto min-h-screen relative shadow-2xl bg-white/20;
+  @apply w-full max-w-[1200px] mx-auto min-h-screen relative md:shadow-2xl md:my-8 md:rounded-[40px] md:overflow-hidden bg-white/5 backdrop-blur-sm lg:flex lg:flex-row;
+}
+
+@media (max-width: 768px) {
+  .max-container {
+    @apply max-w-[480px] shadow-none my-0 rounded-none overflow-visible;
+  }
 }
 
 .glass-card {
